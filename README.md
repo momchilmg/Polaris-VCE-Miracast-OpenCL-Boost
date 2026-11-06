@@ -7,7 +7,7 @@ A tiny, optional OpenCL background workload for AMD Polaris GPUs that may improv
 
 ## The problem
 
-Some AMD Polaris systems show very high **Video Encode** utilization and occasional video/audio stutter when sending a Windows desktop to a Miracast receiver. In our test setup, the issue was especially noticeable at **2560x1440, 30 Hz** while playing video on a Samsung TV.
+On the tested AMD Polaris system, Windows Miracast exhibited very high Video Encode utilization and occasional video/audio stutter. In our test setup, the issue was especially noticeable at **2560x1440, 30 Hz** while playing video on a Samsung TV.
 
 After pausing a movie and resuming it, Windows Task Manager could show **95-98% Video Encode** utilization. The encoder sometimes remained heavily loaded before settling down. High reported utilization by itself is not proof of missed frames; the practical issue was the accompanying playback stutter.
 
@@ -96,11 +96,14 @@ ffmpeg.exe -filters
 
 Check that `avgblur_opencl` appears in the list of available filters.
 
-You can also check the available OpenCL devices with:
+
+To verify that FFmpeg can initialize an OpenCL GPU, run:
 
 ```bat
-ffmpeg.exe -hide_banner -init_hw_device list
+ffmpeg.exe -hide_banner -loglevel verbose -init_hw_device opencl=ocl:,device_type=gpu -f lavfi -i "testsrc2=size=64x36:rate=1" -frames:v 1 -f null NUL
 ```
+
+This tests OpenCL GPU initialization using the same device selection as the helper. It does not enumerate every available OpenCL device. On systems with multiple OpenCL GPUs, explicit device selection may be required.
 
 The FFmpeg build must provide OpenCL support, and your AMD driver must provide a working OpenCL runtime.
 
